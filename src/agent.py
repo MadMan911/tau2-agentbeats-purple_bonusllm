@@ -107,20 +107,8 @@ class Agent:
             logger.info(f"LLM response received: {assistant_content[:100]}...")
         except Exception as e:
             logger.error(f"LLM call failed with error: {type(e).__name__}: {e}")
-            error_feedback = (
-                f"Your previous LLM call failed with error: {type(e).__name__}: {e}. "
-                "Please respond with a valid JSON explaining what went wrong or how you'd like to proceed."
-            )
-            messages.append({"role": "user", "content": error_feedback})
-            response = call_llm_with_retry(
-                messages=messages,
-                model=self.model,
-                response_format={"type": "json_object"},
-                max_retries=self.max_retries,
-                backoff_base=self.backoff_base,
-            )
-            assistant_content = response.choices[0].message.content
-            logger.info(f"LLM recovery response: {assistant_content[:100]}...")
+            logger.exception("Full traceback:")                                                                                                                                                                                        
+            assistant_content = '{"name": "respond", "arguments": {"content": "I encountered an error processing your request."}}'   
 
         messages.append({"role": "assistant", "content": assistant_content})
 
