@@ -48,7 +48,7 @@ def call_llm_with_retry(messages, model, response_format, max_retries=5, backoff
                 messages=messages,
                 model=model,
                 temperature=0.3, # not supported by openai/gpt-5
-                reasoning_effort="high",
+                # reasoning_effort="high",
                 response_format=response_format,
             )
             if attempt > 1:
