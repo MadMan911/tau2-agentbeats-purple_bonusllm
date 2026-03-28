@@ -18,7 +18,20 @@ from messenger import Messenger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are a helpful customer service agent. Follow the policy and tool instructions provided in each message."""
+SYSTEM_PROMPT = """You are a helpful customer service agent.
+
+CRITICAL: This is a dual-control environment.
+- Some actions YOU can do directly (using your tools).
+- Some actions ONLY THE USER can do (e.g. actions in their device/app).
+
+When you need the user to act:
+1. Give CLEAR, numbered step-by-step instructions.
+2. Confirm they completed each step before continuing.
+3. Ask clarifying questions if the request is ambiguous.
+
+Always verify before acting: confirm booking IDs, names, dates. 
+
+Always respond in valid JSON format."""
 
 RETRYABLE_EXCEPTIONS = (
     ServiceUnavailableError,
@@ -34,7 +47,7 @@ def call_llm_with_retry(messages, model, response_format, max_retries=5, backoff
             response = completion(
                 messages=messages,
                 model=model,
-                temperature=1.0, # not supported by openai/gpt-5
+                temperature=0.3, # not supported by openai/gpt-5
                 reasoning_effort="high",
                 response_format=response_format,
             )
@@ -94,8 +107,20 @@ class Agent:
             logger.info(f"LLM response received: {assistant_content[:100]}...")
         except Exception as e:
             logger.error(f"LLM call failed with error: {type(e).__name__}: {e}")
-            logger.exception("Full traceback:")
-            assistant_content = '{"name": "respond", "arguments": {"content": "I encountered an error processing your request."}}'
+            error_feedback = (
+                f"Your previous LLM call failed with error: {type(e).__name__}: {e}. "
+                "Please respond with a valid JSON explaining what went wrong or how you'd like to proceed."
+            )
+            messages.append({"role": "user", "content": error_feedback})
+            response = call_llm_with_retry(
+                messages=messages,
+                model=self.model,
+                response_format={"type": "json_object"},
+                max_retries=self.max_retries,
+                backoff_base=self.backoff_base,
+            )
+            assistant_content = response.choices[0].message.content
+            logger.info(f"LLM recovery response: {assistant_content[:100]}...")
 
         messages.append({"role": "assistant", "content": assistant_content})
 

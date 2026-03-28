@@ -1,6 +1,9 @@
 .DS_Store
 .env
 .python-version
+*.md
+local/*
+*.html
 
 # Python-generated files
 __pycache__/
