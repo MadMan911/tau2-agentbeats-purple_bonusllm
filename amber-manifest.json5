@@ -5,8 +5,6 @@
     properties: {
       agent_llm: { type: "string" },
       openai_api_key: { type: "string", secret: true, default: "" },
-      gemini_api_key: { type: "string", secret: true, default: "" },
-      deepseek_api_key: { type: "string", secret: true, default: "" },
     },
     required: ["agent_llm"],
     additionalProperties: false,
@@ -15,13 +13,11 @@
     proxy: { kind: "a2a", optional: true },
   },
   program: {
-    image: "ghcr.io/andrew7234/tau2-agentbeats-base-purple:latest",
+    image: "ghcr.io/madman911/tau2-agentbeats-purple_bonusllm:latest",
     entrypoint: ["uv", "run", "src/server.py", "--host", "0.0.0.0", "--port", "9009"],
     env: {
       AGENT_LLM: "${config.agent_llm}",
       OPENAI_API_KEY: "${config.openai_api_key}",
-      GEMINI_API_KEY: "${config.gemini_api_key}",
-      DEEPSEEK_API_KEY: "${config.deepseek_api_key}",
       LOG_LEVEL: "INFO",
     },
     network: {
