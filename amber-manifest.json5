@@ -4,6 +4,7 @@
     type: "object",
     properties: {
       agent_llm: { type: "string" },
+      openrouter_api_key: { type: "string", secret: true, default: "" },
       openai_api_key: { type: "string", secret: true, default: "" },
       mistral_api_key: { type: "string", secret: true, default: "" },
     },
@@ -18,6 +19,7 @@
     entrypoint: ["uv", "run", "src/server.py", "--host", "0.0.0.0", "--port", "9009"],
     env: {
       AGENT_LLM: "${config.agent_llm}",
+      OPENROUTER_API_KEY: "${config.openrouter_api_key}",
       OPENAI_API_KEY: "${config.openai_api_key}",
       MISTRAL_API_KEY: "${config.mistral_api_key}",
       LOG_LEVEL: "INFO",
