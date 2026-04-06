@@ -93,14 +93,14 @@ def _parse_retry_after(e: Exception) -> float | None:
             return None
         # Numeric seconds: "Retry-After: 30"
         wait = float(header)
-        return wait if wait <= 30 else None
+        return wait if wait <= 240 else None
     except (ValueError, AttributeError):
         pass
     try:
         # HTTP date: "Retry-After: Wed, 21 Oct 2015 07:28:00 GMT"
         retry_at = parsedate_to_datetime(header)
         wait = (retry_at - parsedate_to_datetime(e.response.headers.get("date", ""))).total_seconds()
-        return wait if 0 <= wait <= 30 else None
+        return wait if 0 <= wait <= 240 else None
     except Exception:
         return None
 
